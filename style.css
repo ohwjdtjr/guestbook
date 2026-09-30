@@ -131,3 +131,15 @@ button:hover {
 .delete-btn:hover {
   background-color: #dc2626;
 }
+/* 모바일 최적화 (화면 폭 768px 이하) */
+@media (max-width: 768px) {
+    body {
+        margin-left: 0 !important; /* 모바일에서 PC용 오른쪽 밀림 제거 */
+        padding: 16px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 100%; /* 모바일 화면 폭에 맞게 가득 차도록 설정 */
+    }
+}
