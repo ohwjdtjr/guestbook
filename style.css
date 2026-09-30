@@ -19,7 +19,24 @@ body {
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
+.top-header {
+    /* 카드와의 간격 (숫자가 클수록 카드와 멀어집니다) */
+    margin-bottom: 16px; 
+}
 
+.top-header a {
+    font-size: 3rem;      /* 글자 크기 (기본값: 1rem = 16px) */
+    font-weight: 500;       /* 글자 두께 (400: 보통, 700: 굵게) */
+    color: #4366CE;         /* 링크 글자 색상 */
+    text-decoration: none;  /* 밑줄 제거 */
+    transition: color 0.2s; /* 색상 변경 시 부드러운 효과 시간 */
+    text-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); /* 글자 그림자 효과 */
+}
+
+/* 마우스 올려도 색상 변화 없음 */
+.top-header a:hover {
+    text-decoration: underline; /* 마우스 올려도 밑줄 유지 */
+}
 h1, h2 {
   font-size: 1.5rem;
   font-weight: 700;
