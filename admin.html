@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방명록 관리자</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🛡️ 관리자 페이지</h1>
+
+    <div id="login-box">
+      <input type="password" id="admin-password" placeholder="관리자 비밀번호" />
+      <button id="login-btn" style="margin-top: 10px;">로그인</button>
+      <p id="error-msg" style="color:#ef4444; font-size:0.85rem; margin-top:8px; display:none;">비밀번호가 틀렸습니다.</p>
+    </div>
+
+    <div id="admin-box" style="display: none;">
+      <h2>댓글 삭제 관리</h2>
+      <div id="messages-list"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const ADMIN_PASS = "admin1234"; // 비밀번호
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtazu-QkEd_iluZ0MRJNR5AbbYPQMQK2hs",
+      authDomain: "guestbook-4f21b.firebaseapp.com",
+      projectId: "guestbook-4f21b",
+      storageBucket: "guestbook-4f21b.appspot.com",
+      messagingSenderId: "327752784279",
+      appId: "1:327752784279:web:7499b9cc7fbfee047b0cd2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const loginBtn = document.getElementById("login-btn");
+    const loginBox = document.getElementById("login-box");
+    const adminBox = document.getElementById("admin-box");
+    const errorMsg = document.getElementById("error-msg");
+    const messagesList = document.getElementById("messages-list");
+
+    loginBtn.addEventListener("click", () => {
+      const inputPass = document.getElementById("admin-password").value;
+      if (inputPass === ADMIN_PASS) {
+        loginBox.style.display = "none";
+        adminBox.style.display = "block";
+        loadAdminMessages();
+      } else {
+        errorMsg.style.display = "block";
+      }
+    });
+
+    function loadAdminMessages() {
+      const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        messagesList.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const date = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString('ko-KR') : '방금 전';
+
+          const card = document.createElement("div");
+          card.className = "message-card";
+          card.innerHTML = `
+            <div class="message-header">
+              <span class="nickname">${data.nickname}</span>
+              <span class="time">${date}</span>
+            </div>
+            <div class="message-text">${data.message}</div>
+            <button class="delete-btn" data-id="${docSnap.id}">삭제하기</button>
+          `;
+          messagesList.appendChild(card);
+        });
+
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            const id = e.target.getAttribute("data-id");
+            if (confirm("이 글을 정말 삭제하시겠습니까?")) {
+              await deleteDoc(doc(db, "messages", id));
+            }
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>
