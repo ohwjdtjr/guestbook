@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>방명록</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>💬 방명록</h1>
+    
+    <form id="guestbook-form">
+      <input type="text" id="nickname" placeholder="닉네임" maxlength="20" required />
+      <textarea id="message" placeholder="남기고 싶은 이야기를 적어주세요!" maxlength="200" required></textarea>
+      <button type="submit">작성하기</button>
+    </form>
+
+    <div id="messages-list"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBtazu-QkEd_iluZ0MRJNR5AbbYPQMQK2hs",
+      authDomain: "guestbook-4f21b.firebaseapp.com",
+      projectId: "guestbook-4f21b",
+      storageBucket: "guestbook-4f21b.appspot.com",
+      messagingSenderId: "327752784279",
+      appId: "1:327752784279:web:7499b9cc7fbfee047b0cd2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("guestbook-form");
+    const messagesList = document.getElementById("messages-list");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nickname = document.getElementById("nickname").value.trim();
+      const message = document.getElementById("message").value.trim();
+
+      if (!nickname || !message) return;
+
+      try {
+        await addDoc(collection(db, "messages"), {
+          nickname,
+          message,
+          timestamp: serverTimestamp()
+        });
+        form.reset();
+      } catch (error) {
+        alert("글 등록에 실패했습니다.");
+      }
+    });
+
+    const q = query(collection(db, "messages"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+      messagesList.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const date = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleString('ko-KR') : '방금 전';
+
+        const card = document.createElement("div");
+        card.className = "message-card";
+        card.innerHTML = `
+          <div class="message-header">
+            <span class="nickname">${escapeHtml(data.nickname)}</span>
+            <span class="time">${date}</span>
+          </div>
+          <div class="message-text">${escapeHtml(data.message)}</div>
+        `;
+        messagesList.appendChild(card);
+      });
+    });
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
